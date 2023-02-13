@@ -5,6 +5,22 @@ const MAX_INDEX: usize = GRIDLEN-1;
 
 pub struct Board{
     grid: [[bool; GRIDLEN]; GRIDLEN],
+    swaps: Vec<(usize, usize)>
+}
+
+impl From<Vec<(usize, usize)>> for Board{
+    fn from(coordinates: Vec<(usize, usize)>) -> Self{
+        let mut board = Board{grid: [[false; GRIDLEN]; GRIDLEN],
+                              swaps: Vec::new()};
+
+        for i in coordinates{
+            if i.0 < GRIDLEN && i.1 < GRIDLEN{
+                board.grid[i.0][i.1] = true;
+            }
+        }
+
+        board
+    }
 }
 
 impl Board{
@@ -25,30 +41,29 @@ impl Board{
         grid.push_str(&(floor));
         print!("{}\n", grid);
     }
-
+ 
     pub fn update(&mut self){
-        let mut swaps: Vec<(usize, usize)> = Vec::new();
+        self.swaps.clear();
         for (x, i) in self.grid.iter().enumerate(){
             for (y, j) in i.iter().enumerate(){
                 if *j{
                     match self.live_neighbours(x, y){
                         2 | 3 => continue,
-                        _=> swaps.push((x, y))
+                        _=> self.swaps.push((x, y))
                     }
                 } else if self.live_neighbours(x, y) == 3{
-                        swaps.push((x, y))
+                        self.swaps.push((x, y))
                 }
 
             } 
         }
-        for i in swaps{
+        for i in self.swaps.iter(){
             self.grid[i.0][i.1] ^= true; 
         }
     }
 
     fn live_neighbours(&self, x: usize, y: usize) -> u8{
         let mut ans = 0;
-
         let x_range: Range<usize>;
         let y_range: Range<usize>;
 
@@ -76,17 +91,6 @@ impl Board{
     }
 }
 
-impl From<Vec<(usize, usize)>> for Board{
-    fn from(coordinates: Vec<(usize, usize)>) -> Self{
-        let mut board = Board{grid: [[false; GRIDLEN]; GRIDLEN]};
-        for i in coordinates{
-            if i.0 < GRIDLEN && i.1 < GRIDLEN{
-                board.grid[i.0][i.1] = true;
 
-            }
-        }
-        board
-    }
-}
 
 

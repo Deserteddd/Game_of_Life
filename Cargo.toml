@@ -1,5 +1,5 @@
 [package]
-name = "Game_of_Life"
+name = "gameoflife"
 version = "0.1.0"
 edition = "2021"
 

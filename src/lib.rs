@@ -8,7 +8,6 @@ const MAX_INDEX: usize = GRIDLEN-1;
 pub trait Draw {
     fn draw(&self);
 }
-
 pub trait Configure {
     fn configure(&mut self, c: Config);
 }
@@ -18,7 +17,6 @@ pub trait Configure {
 pub struct Config{
     pub args: Vec<String>,
     pub draws: bool,
-    pub returns: bool,
     pub sleeptime: u64
 }
 
@@ -38,11 +36,8 @@ impl Results{
 
 impl Draw for Results{
     fn draw(&self){
-        // index == self.repeating_key, count == self.final_count
-
         self.final_board.draw();
         let pattern_length = self.final_count - self.repeating_key;
-        
         match pattern_length{ 
             0 => println!("Pattern became static at iteration: {}", self.repeating_key),
 
@@ -62,11 +57,10 @@ pub struct Game{
     past_states: HashMap<Vec<Vec<bool>>, u64>,
     sleeptime: time::Duration,
     draw: bool,
-    returns: bool
 }
 
 impl Game{
-    pub fn run(&mut self) -> Option<Results>{
+    pub fn run(&mut self) -> Results{
         let mut count: u64 = 0;        
         loop{
             count += 1;
@@ -74,19 +68,13 @@ impl Game{
             self.tick();
             let new_state = self.board.get_state();
             if self.past_states.contains_key(&new_state){
-                match self.returns{
-                    true => return Some(
-                        Results { 
-                            final_board: (self.board.clone()),
-                            final_count: (count),
-                            repeating_key: *self.past_states.get(&new_state).unwrap()
-                        }),
-
-                    false => {
-                        return None;
-                    }
+                return Results { 
+                    final_board: (self.board.clone()),
+                    final_count: (count),
+                    repeating_key: *self.past_states.get(&new_state).unwrap()
                 }
             }
+            
         }
     }
 
@@ -99,9 +87,6 @@ impl Game{
         self.draw = *b;
     }
 
-    fn set_returns(&mut self, b: &bool){
-        self.returns = *b;
-    }
 
     fn tick(&mut self){
         if self.draw{
@@ -119,7 +104,6 @@ impl From<Board> for Game{
             past_states: HashMap::new(),
             sleeptime: time::Duration::from_millis(25),
             draw: true,
-            returns: true,
         }
     }
 }
@@ -131,7 +115,6 @@ impl From <Vec<(usize, usize)>> for Game {
             past_states: HashMap::new(),
             sleeptime: time::Duration::from_millis(25),
             draw: true,
-            returns: true,
         }
     }
 }
@@ -140,7 +123,6 @@ impl Configure for Game{
     fn configure(&mut self, config: Config) {
         self.set_draw(&config.draws);
         self.set_sleeptime(&config.sleeptime);
-        self.set_returns(&config.returns);
     }
 }
 

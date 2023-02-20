@@ -1,4 +1,5 @@
 use gameoflife::*;
+use std::time::*;
 
 fn main() {
     let p1: Vec<(usize, usize)> = vec![
@@ -11,21 +12,22 @@ fn main() {
 
     let p1_config = Config{
         args: Vec::new(),
-        draws: true,
-        returns: true,
-        sleeptime: 40
+        draws: false,
+        sleeptime: 0
     };
 
+    let now = Instant::now();
     run(p1, p1_config);
+
+    println!("Runtime: {:?}", now.elapsed());
+    //test
+    
 }
 
 
 fn run(pattern: Vec<(usize, usize)>, config: Config){
+
         let mut game = Game::from(pattern);
         game.configure(config);
-        let x = game.run();
-        match &x{
-            Some(_) => x.unwrap().draw(),
-            None => println!("Game returned None"),
-        }
+        game.run().draw();
 }
